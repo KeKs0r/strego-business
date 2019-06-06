@@ -6,19 +6,37 @@
     "serve": "yarn build && firebase serve --only functions",
     "shell": "yarn build && firebase functions:shell",
     "start": "yarn shell",
+    "predeploy": "rimraf lib && yarn build",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "script:sync-transferwise": "ts-node scripts/sync-transferwise.ts",
+    "scraper:watch": "yarn nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/fidor/scraper.ts",
+    "repl:sevdesk": "yarn nodemon --watch 'src/**/*.ts' --watch 'repl/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' repl/sevdesk-repl.ts",
+    "repl:tw": "yarn nodemon --watch 'src/**/*.ts' --watch 'repl/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' repl/transferwise-repl.ts"
   },
   "engines": {
     "node": "8"
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@mojoio/sevdesk": "^1.5.27",
+    "@types/dotenv": "^6.1.1",
+    "@types/got": "^9.4.4",
+    "@types/puppeteer": "^1.12.4",
+    "date-fns": "^2.0.0-alpha.29",
+    "dotenv": "^8.0.0",
     "firebase-admin": "~7.0.0",
-    "firebase-functions": "^2.3.0"
+    "firebase-functions": "^2.3.0",
+    "got": "^9.6.0",
+    "lodash": "^4.17.11",
+    "puppeteer": "^1.17.0",
+    "sevdesk": "^0.1.1"
   },
   "devDependencies": {
     "firebase-functions-test": "^0.1.6",
+    "nodemon": "^1.19.1",
+    "rimraf": "^2.6.3",
+    "ts-node": "^8.2.0",
     "tslint": "^5.12.0",
     "typescript": "^3.2.2"
   },
