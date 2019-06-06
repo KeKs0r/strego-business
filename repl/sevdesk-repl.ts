@@ -39,15 +39,30 @@ async function createTransaction() {
 }
 
 async function checkAcount() {
-  if (true) {
-    return true;
-  }
-  const sevdeskCheckingAccount = await sevdesk.SevdeskCheckingAccount.getCheckingAccountByName(
-    sevdeskAccount,
-    "Transferwise USD"
+  // const sevdeskCheckingAccount = await sevdesk.SevdeskCheckingAccount.getCheckingAccountByName(
+  //   sevdeskAccount,
+  //   "Transferwise USD"
+  // );
+
+  const response = await sevdeskAccount.request(
+    "GET",
+    "/CheckAccountTransaction"
   );
-  sevdeskAccount;
-  console.log(sevdeskCheckingAccount);
+  const apiObjectArray = response.objects;
+  const twTransactions = apiObjectArray.filter(
+    (t: { checkAccount: { id: string } }) => t.checkAccount.id === "544237"
+  );
+  const updateAll = twTransactions.map((t: { id: any }) => {
+    // tslint:disable-next-line: no-floating-promises
+    sevdeskAccount.request("PUT", `/CheckAccountTransaction/${t.id}`, {
+      status: "100"
+    });
+  });
+  await Promise.all(updateAll);
+  // console.log(apiObjectArray);
+  // return;
+  console.log();
+  // return [];
 }
 
 async function run() {

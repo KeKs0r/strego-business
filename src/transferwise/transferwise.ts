@@ -65,7 +65,7 @@ export function mapToSevdesk(t: TransferwiseTransaction): ISevdeskTransaction {
     payeeName: t.details.senderName,
     amount: t.amount.value,
     date: new Date(t.date),
-    status: "paid",
+    status: "unpaid",
     description: t.details.paymentReference
   };
 }
