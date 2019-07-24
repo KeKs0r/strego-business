@@ -3,17 +3,28 @@ import {
   SevdeskTransaction,
   ISevdeskTransaction
 } from "@mojoio/sevdesk";
+import { CheckingAccounts } from "./sevdesk-config";
 import { SEVDESK_API_KEY } from "../config";
 import firebase from "../service/firebase";
 
 const db = firebase.firestore();
 
-export enum CheckingAccounts {
-  Fidor = "514502",
-  TransferwiseUSD = "544237"
+export enum Status {
+  CREATED = "100",
+  PAID = "1000" // Or cancelled, not clear :(
 }
 
-const sevdeskAccount = new SevdeskAccount(SEVDESK_API_KEY);
+export enum Currency {
+  USD = "USD",
+  EUR = "EUR"
+}
+
+export type ICheckAccountTransaction = ISevdeskTransaction & {
+  feeAmount: number;
+  additionalInformation: string;
+};
+
+export const sevClient = new SevdeskAccount(SEVDESK_API_KEY);
 
 export async function createPayment(
   referenceId: string,
@@ -32,6 +43,6 @@ export async function createPaymentFromStore(transaction: ISevdeskTransaction) {
     sevdeskCheckingAccountId: CheckingAccounts.TransferwiseUSD,
     ...transaction
   });
-  await payment.save(sevdeskAccount);
+  await payment.save(sevClient);
   return payment;
 }

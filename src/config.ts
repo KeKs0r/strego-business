@@ -14,3 +14,7 @@ export const SEVDESK_API_KEY =
 export const TRANSFERWISE_API_KEY =
   get(functions.config(), "transferwise.api_key") ||
   process.env.TRANSFERWISE_API_KEY;
+
+export const CODEMENTOR_API_KEY =
+  get(functions.config(), "codementor.api_key") ||
+  process.env.CODEMENTOR_API_KEY;

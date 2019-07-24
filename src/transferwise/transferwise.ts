@@ -1,8 +1,7 @@
 import * as got from "got";
-import { ISevdeskTransaction } from "@mojoio/sevdesk";
 import { TRANSFERWISE_API_KEY } from "../config";
 import { endOfDay, addHours } from "date-fns";
-import { createPayment } from "../sevdesk/sevdesk";
+import { createPayment, ICheckAccountTransaction } from "../sevdesk/sevdesk";
 
 export const StregoProfile = "8319236";
 export const USDAccount = "2912587";
@@ -40,6 +39,7 @@ type TransferwiseTransaction = {
   details: TransactionDetails;
   runningBalance: Amount;
   referenceNumber: string;
+  feeAmount: Amount;
 };
 
 const client = got.extend({
@@ -60,13 +60,17 @@ export async function getTransactions(
   return activities.body.transactions;
 }
 
-export function mapToSevdesk(t: TransferwiseTransaction): ISevdeskTransaction {
+export function mapToSevdesk(
+  t: TransferwiseTransaction
+): ICheckAccountTransaction {
   return {
     payeeName: t.details.senderName,
     amount: t.amount.value,
     date: new Date(t.date),
     status: "unpaid",
-    description: t.details.paymentReference
+    description: t.details.paymentReference,
+    feeAmount: t.totalFees.value,
+    additionalInformation: t.referenceNumber
   };
 }
 
