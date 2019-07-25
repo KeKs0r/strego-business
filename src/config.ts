@@ -18,3 +18,8 @@ export const TRANSFERWISE_API_KEY =
 export const CODEMENTOR_API_KEY =
   get(functions.config(), "codementor.api_key") ||
   process.env.CODEMENTOR_API_KEY;
+
+export const RECAPTCHA_API_KEY =
+  get(functions.config(), "recaptcha.api_key") || process.env.RECAPTCHA_API_KEY;
+
+export const FIDOR_CUTOFF_DATE = "2019-07-05";

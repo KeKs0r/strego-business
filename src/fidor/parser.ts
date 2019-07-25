@@ -1,11 +1,21 @@
 import * as _ from "lodash";
+import { TRANSACTION_TYPES } from "./fidor-model";
+import { parse } from "date-fns";
 
-enum TRANSACTION_TYPES {
-  CREDIT = "CREDIT",
-  DEBIT = "DEBIT",
-  TRANSFER = "TRANSFER",
-  CREDIT_CARD = "CREDIT_CARD"
-}
+type ParseDescriptionPart = {
+  description: string;
+  type: TRANSACTION_TYPES;
+  reference: string;
+  partner: string;
+  exchange_rate?: number;
+  exchange_amount?: number;
+  exchange_fee?: number;
+  exchange_pair?: string;
+  iban?: string;
+  uci?: string;
+  bic?: string;
+  umr?: string;
+};
 
 export const TRANSACTION_LABELS: { [s: string]: TRANSACTION_TYPES } = {
   Gutschrift: TRANSACTION_TYPES.CREDIT,
@@ -66,7 +76,10 @@ function pluckRegex(regex: RegExp, input: string): PluckResult {
   };
 }
 
-function parseBankTransaction(type: string, description: string): object {
+function parseBankTransaction(
+  type: TRANSACTION_TYPES,
+  description: string
+): ParseDescriptionPart {
   const partnerKey =
     type === TRANSACTION_TYPES.TRANSFER ? "Empfänger" : "Absender";
   const [transaction, partnerPart] = description.split(partnerKey);
@@ -110,11 +123,12 @@ function parseBankTransaction(type: string, description: string): object {
     uci,
     umr,
     partner: partner || partnerPartner,
-    reference: reference || preIban
+    reference: reference || preIban,
+    description
   };
 }
 
-function parseCreditCard(description: string) {
+function parseCreditCard(description: string): ParseDescriptionPart {
   let currentRest;
   let exchange_amount;
   const { key: exchange_rate, value: exchange_pair, rest } = pluckRegex(
@@ -143,16 +157,17 @@ function parseCreditCard(description: string) {
   const { key: exchange_fee } = pluckRegex(EXCHANGE_FEE_REGEX, description);
   return {
     type: TRANSACTION_TYPES.CREDIT_CARD,
-    exchange_rate,
+    exchange_rate: parseAmount(exchange_rate),
     exchange_pair,
-    exchange_amount,
-    exchange_fee,
-    partner,
-    reference: description
+    exchange_amount: parseAmount(exchange_amount),
+    exchange_fee: parseAmount(exchange_fee),
+    partner: partner ? partner : exchange_fee ? "Gebühren" : "",
+    reference: description,
+    description
   };
 }
 
-export function parseDescription(description: string) {
+export function parseDescription(description: string): ParseDescriptionPart {
   const typeString = description.split(" ")[0].replace(":", "");
   const type = TRANSACTION_LABELS[typeString];
   if (!type) {
@@ -162,4 +177,19 @@ export function parseDescription(description: string) {
     return parseCreditCard(description);
   }
   return parseBankTransaction(type, description);
+}
+
+export function parseAmount(input?: string) {
+  if (!input) {
+    return;
+  }
+  const withoutSign = input.replace("€", "");
+  const trimmed = _.trim(withoutSign);
+  const parsable = trimmed.replace(".", "").replace(",", ".");
+  const asFloat = parseFloat(parsable);
+  return asFloat;
+}
+
+export function parseDate(input: string): Date {
+  return parse(input, "dd.MM.yyyy", new Date());
 }

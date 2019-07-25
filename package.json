@@ -12,6 +12,7 @@
     "logs": "firebase functions:log",
     "script:sync-transferwise": "ts-node scripts/sync-transferwise.ts",
     "script:sync-codementor": "ts-node scripts/sync-codementor.ts",
+    "script:sync-fidor": "ts-node scripts/sync-fidor.ts",
     "repl": "yarn nodemon --watch 'src/**/*.ts' --watch 'repl/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node'",
     "scraper:watch": "yarn repl src/fidor/scraper.ts",
     "repl:sevdesk": "yarn repl repl/sevdesk-repl.ts",
@@ -37,6 +38,8 @@
     "lodash": "^4.17.11",
     "puppeteer": "^1.17.0",
     "puppeteer-extra": "^2.1.3",
+    "puppeteer-extra-plugin-recaptcha": "^3.0.4",
+    "puppeteer-extra-plugin-stealth": "^2.2.2",
     "sevdesk": "^0.1.1"
   },
   "devDependencies": {

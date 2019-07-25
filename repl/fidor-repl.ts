@@ -1,24 +1,27 @@
-import { launch, Page } from "puppeteer";
-import { FIDOR_USERNAME, FIDOR_PASSWORD } from "../src/config";
-import { default as _ } from "lodash";
+import * as puppeteer from "puppeteer-extra";
+import RecaptchaPlugin from "puppeteer-extra-plugin-recaptcha";
+import * as StealthPlugin from "puppeteer-extra-plugin-stealth";
+import { Page } from "puppeteer-extra";
+import {
+  FIDOR_USERNAME,
+  FIDOR_PASSWORD,
+  RECAPTCHA_API_KEY
+} from "../src/config";
+import * as _ from "lodash";
+import { parseDescription, parseAmount, parseDate } from "../src/fidor/parser";
 
-const RECAPTCHA_SELECTOR = "g-recaptcha";
+const recaptchaPlugin = RecaptchaPlugin({
+  provider: { id: "2captcha", token: RECAPTCHA_API_KEY }
+});
+const stealthPlugin = StealthPlugin();
 
 async function run() {
   const page = await start();
   await login(page);
+  await extractTransactions(page);
 }
 
-async function hasCaptcha(page: Page) {
-  try {
-    await page.waitForSelector(RECAPTCHA_SELECTOR, { timeout: 1000 });
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-function getTransactions() {
+function getRawTransactions() {
   var rows = Array.from(
     document.querySelectorAll("table#booked-transactions tbody tr")
   );
@@ -27,20 +30,23 @@ function getTransactions() {
     .map(row => {
       const [date, description, amount] = row;
       return {
-        date: new Date(date)
+        date,
+        description,
+        amount
       };
     });
-  console.log(data);
+  return data;
 }
 
 async function start(): Promise<Page> {
-  const browser = await launch({ headless: false, defaultViewport: null });
+  puppeteer.use(recaptchaPlugin);
+  puppeteer.use(stealthPlugin);
+  const browser = await puppeteer.launch({
+    headless: false,
+    defaultViewport: null
+  });
   const page = await browser.newPage();
   await page.goto("https://banking.fidor.de/login");
-  const hasRecaptcha = await hasCaptcha(page);
-  if (hasRecaptcha) {
-    console.log("Has recaptcha");
-  }
   return page;
 }
 
@@ -50,19 +56,24 @@ async function login(page: Page) {
   await page.type("#user_password", FIDOR_PASSWORD);
   await page.click("#login");
 
-  const hasRecaptcha = await hasCaptcha(page);
-  if (hasRecaptcha) {
-    console.log("Has recaptcha");
-  }
+  await page.solveRecaptchas();
 
-  await page.waitForNavigation({ timeout: 60 * 1000 });
-  await page.goto(
-    "https://banking.fidor.de/corporate/smart-account/transactions"
-  );
-
-  console.log("New Page URL:", page.url());
+  await page.waitForNavigation({ timeout: 10 * 1000 });
+  console.log("Logged In");
 }
 
-// run()
-//   .then(() => console.log("Done"))
-//   .catch(console.error);
+async function extractTransactions(page: Page) {
+  await page.goto("https://banking.fidor.de/smart-account/transactions");
+  console.log("Navigated to Transactions");
+  const rawTransactions = await page.evaluate(getRawTransactions);
+  const transactions = rawTransactions.map(raw => ({
+    amount: parseAmount(raw.amount),
+    date: parseDate(raw.date),
+    ...parseDescription(raw.description)
+  }));
+  console.log(transactions);
+}
+
+run()
+  .then(() => console.log("Done"))
+  .catch(console.error);

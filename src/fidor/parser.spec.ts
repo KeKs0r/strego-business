@@ -1,4 +1,4 @@
-import { parseDescription } from "./parser";
+import { parseDescription, parseAmount, parseDate } from "./parser";
 
 describe("Fidor Parser", () => {
   describe("Parse Description", () => {
@@ -63,7 +63,6 @@ Absender: Factory Works GmbH, IBAN: DE89700111104107387027, BIC: DEKTDE7GXXX`;
 Empfänger: Marc Hoeffl, IBAN: DE81100110012625576896
 mTAN: 6PLYKK, 02.07.2019 15:19`;
         const parsed = parseDescription(d);
-        console.log(parsed);
         expect(parsed).toHaveProperty("type", "TRANSFER");
         expect(parsed).toHaveProperty("reference", "Darlehen Rueckzahlung");
         expect(parsed).toHaveProperty("partner", "Marc Hoeffl");
@@ -77,8 +76,8 @@ mTAN: 6PLYKK, 02.07.2019 15:19`;
         const parsed = parseDescription(d);
         expect(parsed).toHaveProperty("type", "CREDIT_CARD");
         expect(parsed).toHaveProperty("exchange_pair", "EUR/USD");
-        expect(parsed).toHaveProperty("exchange_rate", "0,8795");
-        expect(parsed).toHaveProperty("exchange_amount", "15,00");
+        expect(parsed).toHaveProperty("exchange_rate", 0.8795);
+        expect(parsed).toHaveProperty("exchange_amount", 15);
         expect(parsed).toHaveProperty("reference", d);
         expect(parsed).toHaveProperty("partner", "NOTION.SO");
       });
@@ -88,12 +87,33 @@ mTAN: 6PLYKK, 02.07.2019 15:19`;
         const parsed = parseDescription(d);
 
         expect(parsed).toHaveProperty("type", "CREDIT_CARD");
-        expect(parsed).toHaveProperty("exchange_fee", "0,20");
+        expect(parsed).toHaveProperty("exchange_fee", 0.2);
         expect(parsed).toHaveProperty(
           "reference",
           "MasterCard Fremdwährungsgebühr in Höhe von 0,20 Euro"
         );
       });
+    });
+  });
+
+  describe("Parse Amount", () => {
+    it("Parses positive Amount", () => {
+      expect(parseAmount("22,02 €")).toEqual(22.02);
+    });
+    it("Parses negative number", () => {
+      expect(parseAmount("-119,00 €")).toEqual(-119);
+    });
+    it("Parses over thousand numbers", () => {
+      expect(parseAmount("-1.000,00 €")).toEqual(-1000);
+    });
+  });
+
+  describe("Parse Date", () => {
+    it("Parses date", () => {
+      const d = parseDate("12.07.2019");
+      expect(d.getFullYear()).toEqual(2019);
+      expect(d.getMonth()).toEqual(6);
+      expect(d.getDate()).toEqual(12);
     });
   });
 });

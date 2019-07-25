@@ -6,6 +6,7 @@ import {
 import { CheckingAccounts } from "./sevdesk-config";
 import { SEVDESK_API_KEY } from "../config";
 import firebase from "../service/firebase";
+import cleanObject from "./util/clean-object";
 
 const db = firebase.firestore();
 
@@ -20,7 +21,7 @@ export enum Currency {
 }
 
 export type ICheckAccountTransaction = ISevdeskTransaction & {
-  feeAmount: number;
+  feeAmount?: number;
   additionalInformation: string;
 };
 
@@ -33,8 +34,8 @@ export async function createPayment(
 ) {
   const docRef = db.collection("sevdesk-payments").doc(referenceId);
   return docRef.set({
-    transaction,
-    meta
+    transaction: cleanObject(transaction),
+    meta: cleanObject(meta)
   });
 }
 
