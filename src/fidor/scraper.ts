@@ -1,7 +1,6 @@
 import * as puppeteer from "puppeteer-extra";
 import RecaptchaPlugin from "puppeteer-extra-plugin-recaptcha";
 import * as StealthPlugin from "puppeteer-extra-plugin-stealth";
-import { Page } from "puppeteer-extra";
 import {
   FIDOR_USERNAME,
   FIDOR_PASSWORD,
@@ -34,7 +33,7 @@ function getRawTransactions() {
   return data;
 }
 
-async function start(): Promise<Page> {
+async function start(): Promise<puppeteer.Page> {
   puppeteer.use(recaptchaPlugin);
   puppeteer.use(stealthPlugin);
   const browser = await puppeteer.launch({
@@ -46,7 +45,7 @@ async function start(): Promise<Page> {
   return page;
 }
 
-async function login(page: Page) {
+async function login(page: puppeteer.Page) {
   await page.type("#user_email", FIDOR_USERNAME);
   await page.type("#user_password", FIDOR_PASSWORD);
   await page.click("#login");
@@ -58,7 +57,7 @@ async function login(page: Page) {
 }
 
 async function extractTransactions(
-  page: Page
+  page: puppeteer.Page
 ): Promise<Array<FidorTransaction>> {
   await page.goto("https://banking.fidor.de/smart-account/transactions");
   console.log("Navigated to Transactions");

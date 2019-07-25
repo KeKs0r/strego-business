@@ -51,8 +51,9 @@ export async function createInvoiceWithKey(
   });
 }
 
-export const onInvoiceCreate = functions.firestore
-  .document("sevdesk-invoice/{referenceId}")
+export const onInvoiceCreate = functions
+  .region("europe-west1")
+  .firestore.document("sevdesk-invoice/{referenceId}")
   .onCreate(async (snap, context) => {
     const invoiceData = snap.get("invoice");
     const invoice = new Invoice(invoiceData);

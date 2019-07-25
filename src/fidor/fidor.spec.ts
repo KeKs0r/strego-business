@@ -1,4 +1,5 @@
-import { getKeyForTransaction, FidorTransaction } from "./fidor";
+import { getKeyForTransaction } from "./fidor";
+import { FidorTransaction } from "./fidor-model";
 
 describe("getKeyForTransaction", () => {
   it("Generates Key", () => {
