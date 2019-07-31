@@ -2,12 +2,14 @@ import * as got from "got";
 import { TRANSFERWISE_API_KEY } from "../config";
 import { endOfDay, addHours } from "date-fns";
 import { createPayment, ICheckAccountTransaction } from "../sevdesk/sevdesk";
+import { CheckingAccounts } from "../sevdesk/sevdesk-config";
 
 export const StregoProfile = "8319236";
 export const USDAccount = "2912587";
 
 enum TransferType {
-  CREDIT = "CREDIT"
+  CREDIT = "CREDIT",
+  DEBIBT = "DEBIT"
 }
 
 enum Currency {
@@ -20,8 +22,13 @@ type Amount = {
 };
 
 enum DetailsType {
-  DEPOSIT = "DEPOSIT"
+  DEPOSIT = "DEPOSIT",
+  CARD = "CARD"
 }
+
+type TransactionMerchant = {
+  name: string;
+};
 
 type TransactionDetails = {
   type: DetailsType;
@@ -29,7 +36,10 @@ type TransactionDetails = {
   senderName: string;
   senderAccount: string;
   paymentReference: string;
+  merchant: TransactionMerchant;
 };
+
+type PaymentStatus = "unpaid" | "paid";
 
 type TransferwiseTransaction = {
   type: TransferType;
@@ -64,13 +74,13 @@ export function mapToSevdesk(
   t: TransferwiseTransaction
 ): ICheckAccountTransaction {
   return {
-    payeeName: t.details.senderName,
     amount: t.amount.value,
     date: new Date(t.date),
-    status: "unpaid",
-    description: t.details.paymentReference,
+    status: "unpaid" as PaymentStatus,
+    additionalInformation: t.referenceNumber,
     feeAmount: t.totalFees.value,
-    additionalInformation: t.referenceNumber
+    description: t.details.paymentReference || t.details.description,
+    payeeName: t.details.senderName || t.details.merchant.name
   };
 }
 
@@ -79,7 +89,12 @@ export async function syncDelta(s?: Date) {
 
   const transactions = await getTransactions(since);
   const tasks = transactions.map(t =>
-    createPayment(t.referenceNumber, mapToSevdesk(t), t)
+    createPayment(
+      t.referenceNumber,
+      CheckingAccounts.TransferwiseUSD,
+      mapToSevdesk(t),
+      t
+    )
   );
   return Promise.all(tasks);
 }

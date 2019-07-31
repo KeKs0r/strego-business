@@ -6,8 +6,9 @@ const onPaymentCreate = functions
   .firestore.document("sevdesk-payments/{referenceId}")
   .onCreate(async (snap, context) => {
     const transaction = snap.get("transaction");
+    const account = snap.get("account");
     console.log("Creating Transaction", transaction);
-    const createdPayment = await createPaymentFromStore(transaction);
+    const createdPayment = await createPaymentFromStore(account, transaction);
     console.log("created", createdPayment);
   });
 

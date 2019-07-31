@@ -1,5 +1,5 @@
 import * as puppeteer from "puppeteer-extra";
-import RecaptchaPlugin from "puppeteer-extra-plugin-recaptcha";
+// import RecaptchaPlugin from "puppeteer-extra-plugin-recaptcha";
 import * as StealthPlugin from "puppeteer-extra-plugin-stealth";
 import {
   FIDOR_USERNAME,
@@ -11,9 +11,9 @@ import * as _ from "lodash";
 import { parseDescription, parseAmount, parseDate } from "./parser";
 import { FidorTransaction } from "./fidor-model";
 
-const recaptchaPlugin = RecaptchaPlugin({
-  provider: { id: "2captcha", token: RECAPTCHA_API_KEY }
-});
+// const recaptchaPlugin = RecaptchaPlugin({
+//   provider: { id: "2captcha", token: RECAPTCHA_API_KEY }
+// });
 const stealthPlugin = StealthPlugin();
 
 function getRawTransactions() {
@@ -34,11 +34,12 @@ function getRawTransactions() {
 }
 
 async function start(): Promise<puppeteer.Page> {
-  puppeteer.use(recaptchaPlugin);
+  // puppeteer.use(recaptchaPlugin);
   puppeteer.use(stealthPlugin);
   const browser = await puppeteer.launch({
     // headless: false,
     // defaultViewport: null
+    args: ['--no-sandbox']
   });
   const page = await browser.newPage();
   await page.goto("https://banking.fidor.de/login");

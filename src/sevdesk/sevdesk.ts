@@ -29,19 +29,24 @@ export const sevClient = new SevdeskAccount(SEVDESK_API_KEY);
 
 export async function createPayment(
   referenceId: string,
+  account: CheckingAccounts,
   transaction: ISevdeskTransaction,
   meta: object
 ) {
   const docRef = db.collection("sevdesk-payments").doc(referenceId);
   return docRef.set({
+    account: account,
     transaction: cleanObject(transaction),
     meta: cleanObject(meta)
   });
 }
 
-export async function createPaymentFromStore(transaction: ISevdeskTransaction) {
+export async function createPaymentFromStore(
+  account: CheckingAccounts,
+  transaction: ISevdeskTransaction
+) {
   const payment = new SevdeskTransaction({
-    sevdeskCheckingAccountId: CheckingAccounts.TransferwiseUSD,
+    sevdeskCheckingAccountId: account,
     ...transaction
   });
   await payment.save(sevClient);
