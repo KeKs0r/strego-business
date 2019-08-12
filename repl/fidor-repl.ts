@@ -1,5 +1,5 @@
 import * as puppeteer from "puppeteer-extra";
-import RecaptchaPlugin from "puppeteer-extra-plugin-recaptcha";
+// import RecaptchaPlugin from "puppeteer-extra-plugin-recaptcha";
 import * as StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { Page } from "puppeteer-extra";
 import {
@@ -10,9 +10,9 @@ import {
 import * as _ from "lodash";
 import { parseDescription, parseAmount, parseDate } from "../src/fidor/parser";
 
-const recaptchaPlugin = RecaptchaPlugin({
-  provider: { id: "2captcha", token: RECAPTCHA_API_KEY }
-});
+// const recaptchaPlugin = RecaptchaPlugin({
+//   provider: { id: "2captcha", token: RECAPTCHA_API_KEY }
+// });
 const stealthPlugin = StealthPlugin();
 
 async function run() {
@@ -56,7 +56,7 @@ async function login(page: Page) {
   await page.type("#user_password", FIDOR_PASSWORD);
   await page.click("#login");
 
-  await page.solveRecaptchas();
+  // await page.solveRecaptchas();
 
   await page.waitForNavigation({ timeout: 10 * 1000 });
   console.log("Logged In");
