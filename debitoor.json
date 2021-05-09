@@ -1,0 +1,20 @@
+{
+    "message": "Error validating against schema",
+    "id": "c8a6aa46-4d7b-4d6a-b3d0-599bcc04ca62",
+    "code": "schema",
+    "errors": [
+        {
+            "message": "has additional properties",
+            "type": "object",
+            "schemaPath": [],
+            "property": "attachements"
+        },
+        {
+            "message": "is required",
+            "type": "array",
+            "schemaPath": ["properties", "lines"],
+            "property": "lines"
+        }
+    ],
+    "body": { "date": "2021-01-07" }
+}

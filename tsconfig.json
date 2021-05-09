@@ -1,15 +1,17 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": { "*": ["types/*"] },
-    "module": "commonjs",
-    "noImplicitReturns": true,
-    "noUnusedLocals": false,
-    "outDir": "lib",
-    "sourceMap": true,
-    "strict": true,
-    "target": "es2017"
-  },
-  "compileOnSave": true,
-  "include": ["src"]
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": { "*": ["types/*"] },
+        "module": "commonjs",
+        "noImplicitReturns": true,
+        "noUnusedLocals": false,
+        "outDir": "lib",
+        "sourceMap": true,
+        "strict": true,
+        "target": "es2017",
+        "typeRoots": ["node_modules/@types", "node_modules", "types"],
+        "skipLibCheck": true
+    },
+    "compileOnSave": true,
+    "include": ["src"]
 }
